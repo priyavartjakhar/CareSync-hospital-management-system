@@ -21,13 +21,24 @@ def create_app(config=None):
     app = Flask(__name__)
 
     base_dir = os.path.abspath(os.path.dirname(__file__))
-    root_instance = os.path.abspath(os.path.join(base_dir, '..', 'instance'))
-    os.makedirs(root_instance, exist_ok=True)
-    default_db_path = os.path.join(root_instance, 'hms.db')
+    is_serverless = bool(os.environ.get('VERCEL') or os.environ.get('AWS_LAMBDA_FUNCTION_NAME'))
+    if is_serverless:
+        default_db_path = '/tmp/hms.db'
+    else:
+        root_instance = os.path.abspath(os.path.join(base_dir, '..', 'instance'))
+        try:
+            os.makedirs(root_instance, exist_ok=True)
+            default_db_path = os.path.join(root_instance, 'hms.db')
+        except OSError:
+            default_db_path = '/tmp/hms.db'
 
     # ── Config ──
+    db_url = os.environ.get('DATABASE_URL')
+    if db_url and db_url.startswith('postgres://'):
+        db_url = db_url.replace('postgres://', 'postgresql://', 1)
+
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'change-this-in-production-please')
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', f'sqlite:///{default_db_path}')
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_url or f'sqlite:///{default_db_path}'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # ── Extensions ──
