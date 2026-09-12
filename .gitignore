@@ -1,0 +1,20 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Node / Vite
+node_modules/
+frontend/node_modules/
+frontend/dist/
+.DS_Store
+
+# Temporary & Logs
+scratch/
+*.log
+
+# Database (optional local instance)
+# instance/*.db
