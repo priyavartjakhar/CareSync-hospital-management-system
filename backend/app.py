@@ -74,18 +74,21 @@ def create_app(config=None):
     app.register_blueprint(patient_bp, url_prefix='/api/patient')
 
     # ── DB init + seed ──
-    with app.app_context():
-        db.create_all()
-        ensure_department_uid_schema()
-        ensure_doctor_uid_schema()
-        ensure_patient_uid_schema()
-        ensure_appointment_uid_schema()
-        ensure_no_double_booking_index()
-        backfill_department_uids()
-        backfill_doctor_uids()
-        backfill_patient_uids()
-        backfill_appointment_uids()
-        seed_admin()
+    try:
+        with app.app_context():
+            db.create_all()
+            ensure_department_uid_schema()
+            ensure_doctor_uid_schema()
+            ensure_patient_uid_schema()
+            ensure_appointment_uid_schema()
+            ensure_no_double_booking_index()
+            backfill_department_uids()
+            backfill_doctor_uids()
+            backfill_patient_uids()
+            backfill_appointment_uids()
+            seed_admin()
+    except Exception as err:
+        print(f"[HMS Warning] DB initialization skipped or failed: {err}")
 
     @app.get("/")
     def index():
